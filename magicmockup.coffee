@@ -2,10 +2,10 @@ $ = @jQuery
 
 @magicmockup = do ->
   $doc = $(@document)
+  groups = $('g')
   layers = {}
   filter = {}
   defaultLayer = ''
-
 
   # Convenience function to grab attributes from the Inkscape namespace
   _getInk = (el, attr) ->
@@ -20,8 +20,7 @@ $ = @jQuery
       label = _getInk(@, 'label')
 
       if group is 'layer'
-        layers[label] = @
-        defaultLayer = label if $(@).is(':visible')
+        layers[label] = $ @
 
     return
 
@@ -32,6 +31,14 @@ $ = @jQuery
       label = _getInk(@, 'label')
       filter[label] = @id
 
+  # Convenience function to get jQuery object of group by id
+  # If id isn't found, try layer labels
+  $group = (id) ->
+    group = $ '#'+id, groups
+    if group.length > 0
+      group
+    else
+      layers[id]
 
   # Do the heavy lifting
   # (right now, there's only "next" for switching pages; more to come)
@@ -52,33 +59,31 @@ $ = @jQuery
           $(context).parents('g').not('[style=display:none]').last().hide()
 
           # Show the specified layer
-          $(layers[location]).show?()
-
-          location = '' if location is defaultLayer
+          $group(location).show?()
 
           window.location.hash = location
       
-      show: (show_layers) ->
-        for layer in show_layers
-          $(layers[layer]).show()
+      show: (showgroups) ->
+        for group in showgroups
+          $group(group).show?()
 
-      hide: (hide_layers) ->
-        for layer in hide_layers
-          $(layers[layer]).hide()
+      hide: (hidegroups) ->
+        for group in hidegroups
+          $group(group).hide?()
 
-      toggle: (toggle_layers) ->
-        for layer in toggle_layers
-          $(layers[layer]).toggle()
+      toggle: (togglegroups) ->
+        for group in togglegroups
+          $group(group).toggle?()
 
       fadeOut: (params) ->
         if params? and params.length > 0
           # Capture parameters with defaults
-          layer = params[0]
+          id = params[0]
           time = params[1] ? 1
           easing = params[2] ? 'linear'
           # Convert time from seconds to milliseconds
           time = parseInt(time) * 1000
-          $(layers[layer])
+          $group(id)
             .attr('opacity', 1)
             .animate svgOpacity: 0.0, time, easing, () ->
             # Reset opacity but hide 
@@ -117,30 +122,29 @@ $ = @jQuery
     window.location.hash.substr(1)
 
 
-  # Hide all layers
-  _hideLayers = ->
-    for name, layer of layers
-      $(layer).hide()
+  # Hide all groups
+  _hideGroups = ->
+    groups.hide()
 
 
-  # Make a layer visible
-  _showLayer = (layer) ->
-    if typeof layer isnt 'string'
-      layer = _getHash()
+  # Make a group visible
+  _showGroup = (group) ->
+    if typeof group isnt 'string'
+      group = _getHash()
 
-    # Make sure the layer exists
-    return unless layers[layer] or layer is ''
+    # Make sure the group exists
+    return unless $group(group).length > 0 or group is ''
 
-    _hideLayers()
-    _dispatch @, ['next', layer or defaultLayer]
+    _hideGroups()
+    _dispatch @, ['next', group]
 
 
-  # If a hash is specified, view the appropriate layer
+  # If a hash is specified, view the appropriate group
   _setInitialPage = ->
-    layer = _getHash()
+    group = _getHash()
 
-    if layer
-      _showLayer layer
+    if group
+      _showGroup group
 
 
   # Handle clicks on items with instructions
@@ -185,12 +189,11 @@ $ = @jQuery
     _findFilters()
     _stripInlineJS()
 
-    $(window).bind 'hashchange', _showLayer
+    $(window).bind 'hashchange', _showGroup
 
     $doc.delegate 'g'
       click : _handleClick
       hover : _handleHover
-
 
   {init} # Public exports
 

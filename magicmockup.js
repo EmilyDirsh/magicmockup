@@ -9288,8 +9288,9 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   $ = this.jQuery;
 
   this.magicmockup = (function() {
-    var $doc, defaultLayer, filter, init, layers, _dispatch, _findFilters, _getDescription, _getHash, _getInk, _handleClick, _handleHover, _hideLayers, _initLayers, _setInitialPage, _showLayer, _stripInlineJS;
+    var $doc, $group, defaultLayer, filter, groups, init, layers, _dispatch, _findFilters, _getDescription, _getHash, _getInk, _handleClick, _handleHover, _hideGroups, _initLayers, _setInitialPage, _showGroup, _stripInlineJS;
     $doc = $(this.document);
+    groups = $('g');
     layers = {};
     filter = {};
     defaultLayer = '';
@@ -9305,7 +9306,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
         group = _getInk(this, 'groupmode');
         label = _getInk(this, 'label');
         if (group === 'layer') {
-          layers[label] = this;
+          layers[label] = $(this);
           if ($(this).is(':visible')) return defaultLayer = label;
         }
       });
@@ -9316,6 +9317,15 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
         label = _getInk(this, 'label');
         return filter[label] = this.id;
       });
+    };
+    $group = function(id) {
+      var group;
+      group = $('#' + id, groups);
+      if (group.length > 0) {
+        return group;
+      } else {
+        return layers[id];
+      }
     };
     _dispatch = function(context, _arg) {
       var act, command, params, val;
@@ -9332,48 +9342,48 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
             return act.load(location);
           } else {
             $(context).parents('g').not('[style=display:none]').last().hide();
-            if (typeof (_base = $(layers[location])).show === "function") {
+            if (typeof (_base = $group(location)).show === "function") {
               _base.show();
             }
-            if (location === defaultLayer) location = '';
+            if (location === defaultGroup) location = '';
             return window.location.hash = location;
           }
         },
-        show: function(show_layers) {
-          var layer, _i, _len, _results;
+        show: function(showgroups) {
+          var group, _base, _i, _len, _results;
           _results = [];
-          for (_i = 0, _len = show_layers.length; _i < _len; _i++) {
-            layer = show_layers[_i];
-            _results.push($(layers[layer]).show());
+          for (_i = 0, _len = showgroups.length; _i < _len; _i++) {
+            group = showgroups[_i];
+            _results.push(typeof (_base = $group(group)).show === "function" ? _base.show() : void 0);
           }
           return _results;
         },
-        hide: function(hide_layers) {
-          var layer, _i, _len, _results;
+        hide: function(hidegroups) {
+          var group, _base, _i, _len, _results;
           _results = [];
-          for (_i = 0, _len = hide_layers.length; _i < _len; _i++) {
-            layer = hide_layers[_i];
-            _results.push($(layers[layer]).hide());
+          for (_i = 0, _len = hidegroups.length; _i < _len; _i++) {
+            group = hidegroups[_i];
+            _results.push(typeof (_base = $group(group)).hide === "function" ? _base.hide() : void 0);
           }
           return _results;
         },
-        toggle: function(toggle_layers) {
-          var layer, _i, _len, _results;
+        toggle: function(togglegroups) {
+          var group, _base, _i, _len, _results;
           _results = [];
-          for (_i = 0, _len = toggle_layers.length; _i < _len; _i++) {
-            layer = toggle_layers[_i];
-            _results.push($(layers[layer]).toggle());
+          for (_i = 0, _len = togglegroups.length; _i < _len; _i++) {
+            group = togglegroups[_i];
+            _results.push(typeof (_base = $group(group)).toggle === "function" ? _base.toggle() : void 0);
           }
           return _results;
         },
         fadeOut: function(params) {
-          var easing, layer, time, _ref, _ref2;
+          var easing, id, time, _ref, _ref2;
           if ((params != null) && params.length > 0) {
-            layer = params[0];
+            id = params[0];
             time = (_ref = params[1]) != null ? _ref : 1;
             easing = (_ref2 = params[2]) != null ? _ref2 : 'linear';
             time = parseInt(time) * 1000;
-            $(layers[layer]).attr('opacity', 1).animate({
+            $group(id).attr('opacity', 1).animate({
               svgOpacity: 0.0
             }, time, easing, function() {});
             return $(this).hide().attr('opacity', 1);
@@ -9406,25 +9416,19 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     _getHash = function() {
       return window.location.hash.substr(1);
     };
-    _hideLayers = function() {
-      var layer, name, _results;
-      _results = [];
-      for (name in layers) {
-        layer = layers[name];
-        _results.push($(layer).hide());
-      }
-      return _results;
+    _hideGroups = function() {
+      return groups.hide();
     };
-    _showLayer = function(layer) {
-      if (typeof layer !== 'string') layer = _getHash();
-      if (!(layers[layer] || layer === '')) return;
-      _hideLayers();
-      return _dispatch(this, ['next', layer || defaultLayer]);
+    _showGroup = function(group) {
+      if (typeof group !== 'string') group = _getHash();
+      if (!($group(group).length > 0 || group === '')) return;
+      _hideGroups();
+      return _dispatch(this, ['next', group || defaultGroup]);
     };
     _setInitialPage = function() {
-      var layer;
-      layer = _getHash();
-      if (layer) return _showLayer(layer);
+      var group;
+      group = _getHash();
+      if (group) return _showGroup(group);
     };
     _handleClick = function(e) {
       var action, actions, _i, _len, _ref;
@@ -9457,7 +9461,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       _setInitialPage();
       _findFilters();
       _stripInlineJS();
-      $(window).bind('hashchange', _showLayer);
+      $(window).bind('hashchange', _showGroup);
       return $doc.delegate('g', {
         click: _handleClick,
         hover: _handleHover
