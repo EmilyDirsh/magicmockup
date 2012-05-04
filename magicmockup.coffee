@@ -2,7 +2,6 @@ $ = @jQuery
 
 @magicmockup = do ->
   $doc = $(@document)
-  groups = $('g')
   layers = {}
   filter = {}
   defaultLayer = ''
@@ -24,7 +23,6 @@ $ = @jQuery
 
     return
 
-
   # Find all filters and store in the filter object
   _findFilters = ->
     $doc.find('filter').each ->
@@ -34,7 +32,7 @@ $ = @jQuery
   # Convenience function to get jQuery object of group by id
   # If id isn't found, try layer labels
   $group = (id) ->
-    group = $ '#'+id, groups
+    group = $ "##{id}"
     if group.length > 0
       group
     else

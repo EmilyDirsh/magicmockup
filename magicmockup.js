@@ -9288,9 +9288,8 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   $ = this.jQuery;
 
   this.magicmockup = (function() {
-    var $doc, $group, defaultLayer, filter, groups, init, layers, _dispatch, _findFilters, _getDescription, _getHash, _getInk, _handleClick, _handleHover, _hideGroups, _initLayers, _setInitialPage, _showGroup, _stripInlineJS;
+    var $doc, $group, defaultLayer, filter, init, layers, _dispatch, _findFilters, _getDescription, _getHash, _getInk, _handleClick, _handleHover, _hideGroups, _initLayers, _setInitialPage, _showGroup, _stripInlineJS;
     $doc = $(this.document);
-    groups = $('g');
     layers = {};
     filter = {};
     defaultLayer = '';
@@ -9305,10 +9304,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
         var group, label;
         group = _getInk(this, 'groupmode');
         label = _getInk(this, 'label');
-        if (group === 'layer') {
-          layers[label] = $(this);
-          if ($(this).is(':visible')) return defaultLayer = label;
-        }
+        if (group === 'layer') return layers[label] = $(this);
       });
     };
     _findFilters = function() {
@@ -9320,7 +9316,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
     };
     $group = function(id) {
       var group;
-      group = $('#' + id, groups);
+      group = $("#" + id);
       if (group.length > 0) {
         return group;
       } else {
@@ -9345,7 +9341,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
             if (typeof (_base = $group(location)).show === "function") {
               _base.show();
             }
-            if (location === defaultGroup) location = '';
             return window.location.hash = location;
           }
         },
@@ -9423,7 +9418,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       if (typeof group !== 'string') group = _getHash();
       if (!($group(group).length > 0 || group === '')) return;
       _hideGroups();
-      return _dispatch(this, ['next', group || defaultGroup]);
+      return _dispatch(this, ['next', group]);
     };
     _setInitialPage = function() {
       var group;
