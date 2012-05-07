@@ -196,7 +196,6 @@ $ = @jQuery
     ($ '*').each ->
       $this = $ this
       if $this.children('desc').length > 0
-        console.log this, 'has desc'
         $this.click _handleClick
         $this.hover _handleHover
 

@@ -9461,7 +9461,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
         var $this;
         $this = $(this);
         if ($this.children('desc').length > 0) {
-          console.log(this, 'has desc');
           $this.click(_handleClick);
           return $this.hover(_handleHover);
         }
