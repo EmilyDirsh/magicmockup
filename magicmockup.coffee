@@ -189,9 +189,17 @@ $ = @jQuery
 
     $(window).bind 'hashchange', _showGroup
 
-    $doc.delegate 'g'
-      click : _handleClick
-      hover : _handleHover
+    # $doc.delegate 'g'
+    #   click : _handleClick
+    #   hover : _handleHover
+
+    ($ '*').each ->
+      $this = $ this
+      if $this.children('desc').length > 0
+        console.log this, 'has desc'
+        $this.click _handleClick
+        $this.hover _handleHover
+
 
   {init} # Public exports
 
