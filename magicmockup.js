@@ -9457,9 +9457,14 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       _findFilters();
       _stripInlineJS();
       $(window).bind('hashchange', _showGroup);
-      return $doc.delegate('g', {
-        click: _handleClick,
-        hover: _handleHover
+      return ($('*')).each(function() {
+        var $this;
+        $this = $(this);
+        if ($this.children('desc').length > 0) {
+          console.log(this, 'has desc');
+          $this.click(_handleClick);
+          return $this.hover(_handleHover);
+        }
       });
     };
     return {
