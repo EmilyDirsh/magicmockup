@@ -122,8 +122,7 @@ $ = @jQuery
 
   # Hide all groups
   _hideGroups = ->
-    groups.hide()
-
+    $('g').hide()
 
   # Make a group visible
   _showGroup = (group) ->
