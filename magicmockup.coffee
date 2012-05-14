@@ -183,6 +183,17 @@ $ = @jQuery
     return
 
 
+  # This function binds the correct events to trigger elements.
+  # Trigger elements are any element with a 'desc' child element.
+  # If new trigger elements will be added to the SVG DOM,
+  # this function should be called afterwards to 
+  # ensure they are correctly bound.
+  bindTriggers = () ->
+    ($ 'desc').parent()
+      .click(_handleClick)
+      .hover(_handleHover)
+
+
   # Run on page load
   init = (loadEvent) ->
     _initLayers()
@@ -191,19 +202,10 @@ $ = @jQuery
     _stripInlineJS()
 
     $(window).bind 'hashchange', _showGroup
-
-    # $doc.delegate 'g'
-    #   click : _handleClick
-    #   hover : _handleHover
-
-    ($ '*').each ->
-      $this = $ this
-      if $this.children('desc').length > 0
-        $this.click _handleClick
-        $this.hover _handleHover
+    bindTriggers()
 
 
-  {init} # Public exports
+  {init, bindTriggers} # Public exports
 
 
 # Hack to attach the init to <svg/> for an unobtrusive SVG onload

@@ -9288,7 +9288,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   $ = this.jQuery;
 
   this.magicmockup = (function() {
-    var $doc, $group, defaultLayer, filter, init, layers, _dispatch, _findFilters, _getDescription, _getHash, _getInk, _handleClick, _handleHover, _hideGroups, _initLayers, _setInitialPage, _showGroup, _stripInlineJS;
+    var $doc, $group, bindTriggers, defaultLayer, filter, init, layers, _dispatch, _findFilters, _getDescription, _getHash, _getInk, _handleClick, _handleHover, _hideGroups, _initLayers, _setInitialPage, _showGroup, _stripInlineJS;
     $doc = $(this.document);
     layers = {};
     filter = {};
@@ -9451,23 +9451,20 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
         cursor: 'pointer'
       });
     };
+    bindTriggers = function() {
+      return ($('desc')).parent().click(_handleClick).hover(_handleHover);
+    };
     init = function(loadEvent) {
       _initLayers();
       _setInitialPage();
       _findFilters();
       _stripInlineJS();
       $(window).bind('hashchange', _showGroup);
-      return ($('*')).each(function() {
-        var $this;
-        $this = $(this);
-        if ($this.children('desc').length > 0) {
-          $this.click(_handleClick);
-          return $this.hover(_handleHover);
-        }
-      });
+      return bindTriggers();
     };
     return {
-      init: init
+      init: init,
+      bindTriggers: bindTriggers
     };
   })();
 
