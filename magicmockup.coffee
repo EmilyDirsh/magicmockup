@@ -6,6 +6,7 @@ $ = @jQuery
   filter = {}
   defaultLayer = ''
 
+
   # Convenience function to grab attributes from the Inkscape namespace
   _getInk = (el, attr) ->
     inkNS = 'http://www.inkscape.org/namespaces/inkscape'
@@ -23,11 +24,13 @@ $ = @jQuery
 
     return
 
+
   # Find all filters and store in the filter object
   _findFilters = ->
     $doc.find('filter').each ->
       label = _getInk(@, 'label')
       filter[label] = @id
+
 
   # Convenience function to get jQuery object of group by id
   # If id isn't found, try layer labels
@@ -37,6 +40,7 @@ $ = @jQuery
       group
     else
       layers[id]
+
 
   # Do the heavy lifting
   # (right now, there's only "next" for switching pages; more to come)
