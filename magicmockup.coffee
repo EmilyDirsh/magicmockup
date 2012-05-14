@@ -120,9 +120,9 @@ $ = @jQuery
     window.location.hash.substr(1)
 
 
-  # Hide all groups
+  # Hide all top-level groups
   _hideGroups = ->
-    $('g').hide()
+    $('svg > g').hide()
 
   # Make a group visible
   _showGroup = (group) ->

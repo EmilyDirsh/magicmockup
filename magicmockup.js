@@ -9412,7 +9412,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
       return window.location.hash.substr(1);
     };
     _hideGroups = function() {
-      return $('g').hide();
+      return $('svg > g').hide();
     };
     _showGroup = function(group) {
       if (typeof group !== 'string') group = _getHash();
