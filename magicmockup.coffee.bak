@@ -1,12 +1,16 @@
-@magicmockup = do ->
-  layers = {}
-  filter = {}
-  defaultLayer = ''
+/* $ = @jQuery */
 
-  # Convenience function to grab attributes from the Inkscape namespace
-  _getInk = (el, attr) ->
-    inkNS = 'http://www.inkscape.org/namespaces/inkscape'
-    el.getAttributeNS(inkNS, attr)
+/* @magicmockup = do -> */
+/*   $doc = $(@document) */
+/*   layers = {} */
+/*   filter = {} */
+/*   defaultLayer = '' */
+
+
+/*   # Convenience function to grab attributes from the Inkscape namespace */
+/*   _getInk = (el, attr) -> */
+/*     inkNS = 'http://www.inkscape.org/namespaces/inkscape' */
+/*     el.getAttributeNS(inkNS, attr) */
 
 
 /*   # Add each layer to the layer object (if it contains a an Inkscape label) */
