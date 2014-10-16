@@ -1,11 +1,16 @@
-$ = @jQuery
-
 @magicmockup = do ->
-  $doc = $(@document)
   layers = {}
   filter = {}
   defaultLayer = ''
+  doc = null
 
+  # Helper function for converting a live collection to a static array
+  _toArray = (collection) ->
+    [].slice.call(collection)
+
+  # Helper function for converting a string css time interval (in s) to milliseconds
+  _toMS = (time) ->
+    parseFloat(time) * 1000
 
   # Convenience function to grab attributes from the Inkscape namespace
   _getInk = (el, attr) ->
@@ -14,37 +19,54 @@ $ = @jQuery
 
 
   # Add each layer to the layer object (if it contains a an Inkscape label)
-  _initLayers = ($layers = $('g')) ->
-    $layers.each ->
-      group = _getInk(@, 'groupmode')
-      label = _getInk(@, 'label')
+  _initLayers = () ->
+    groups = _toArray(document.getElementsByTagName 'g')
+    for group in groups
+      mode = _getInk group, 'groupmode'
 
-      if group is 'layer'
-        layers[label] = $ @
+      if mode is 'layer'
+        label = _getInk group, 'label'
+        layers[label] =  group
 
     return
 
+  # Helper function to handle acting on `both layers and
+  # arbitrary objects
+  _fetch = (id) ->
+    if layers[id]?
+      layers[id]
+    else
+      document.getElementById(id)
 
   # Find all filters and store in the filter object
   _findFilters = ->
-    $doc.find('filter').each ->
-      label = _getInk(@, 'label')
-      filter[label] = @id
+    filters = _toArray(document.getElementsByTagName 'filter')
 
+    for f in filters
+      label = _getInk f, 'label'
+      filter[label] = f.id
 
-  # Convenience function to get jQuery object of group by id
-  # If id isn't found, try layer labels
-  $group = (id) ->
-    group = $ "##{id}"
-    if group.length > 0
-      group
-    else
-      layers[id]
+  # Utility functions to manipulate object visibility
+  _hide = (id) ->
+    _fetch(id).style.display = 'none'
 
+  _show = (id) ->
+    _fetch(id).style.display = 'block'
+
+  _hidden = (id) ->
+    _fetch(id).style.display == 'none'
+
+  # Animation functions
+  _fade = (id, duration) ->
+    el = _fetch(id)
+    el.setAttribute "style", "transition: " + duration + " opacity; opacity: 0"
+    setTimeout ->
+      el.style.display = 'none'
+    , _toMS(duration)
+    return
 
   # Do the heavy lifting
-  # (right now, there's only "next" for switching pages; more to come)
-  _dispatch = (context, [command, val]) ->
+  _dispatch = (command, val) ->
     act =
       load: (url) ->
         url = url.shift()
@@ -57,76 +79,77 @@ $ = @jQuery
           act.load(location)
 
         else
-          # Hide the current visible layer
-          $(context).parents('g').not('[style=display:none]').last().hide()
-
+          for layer in layers
+            unless layer.style.display is 'none'
+              layer.style.display = 'none'
           # Show the specified layer
-          $group(location).show?()
+          _show(location)
 
           window.location.hash = location
-      
-      show: (showgroups) ->
-        for group in showgroups
-          $group(group).show?()
 
-      hide: (hidegroups) ->
-        for group in hidegroups
-          $group(group).hide?()
+      show: (show) ->
+        for id in show
+          _show(id)
 
-      toggle: (togglegroups) ->
-        for group in togglegroups
-          $group(group).toggle?()
+      hide: (hide) ->
+        for id in hide
+          _hide(id)
+
+      toggle: (toggle) ->
+        for id in toggle
+          if _hidden(id)
+            _show(id)
+          else
+            _hide(id)
 
       fadeOut: (params) ->
-        if params? and params.length > 0
-          # Capture parameters with defaults
-          id = params[0]
-          time = params[1] ? 1
-          easing = params[2] ? 'linear'
-          # Convert time from seconds to milliseconds
-          time = parseInt(time) * 1000
-          $group(id)
-            .attr('opacity', 1)
-            .animate svgOpacity: 0.0, time, easing, () ->
-            # Reset opacity but hide 
-            $(this).hide().attr 'opacity', 1
+        console.log 'fadeing', params
+        duration = params[1] || ".5s"
+        console.log 'duration', duration
+        _fade params[0], duration
 
     params = val?.split ','
+    params = (p.trim() for p in params)
     act[command]?(params)
-
 
   # Return the description for an element
   _getDescription = (el) ->
-    $(el).children('desc').text()
+    (el.getElementsByTagName 'desc')[0].textContent
 
+  _hasDescription = (el) ->
+    (el.getElementsByTagName 'desc').length > 0
 
   # If there's inline JS, strip it (and provide warnings)
   _stripInlineJS = ->
-    $onclick = $('[onclick]')
+    onclickElements = document.querySelector "[onclick]"
 
-    return unless $onclick.length
+    return unless onclickElements?.length
 
     # Warn about inline JS (if console.warn is available)
     if console and console.warn
 
       console.group? 'Warning: inline JavaScript found (and deactivated)'
-      $onclick.each -> console.warn @id, ':', @onclick
+      for el in onclickElements
+        console.warn el.id, ":", el.onclick
       console.groupEnd?()
 
     # Strip the inline JS
-    $onclick.each -> @onclick = undefined
+    for el in onclickElements
+      el.onclick = undefined
 
     return
 
 
   # Return the URL fragment
   _getHash = ->
-    window.location.hash.substr(1)
+    window.location.hash.substr 1
 
 
   # Hide all top-level groups
   _hideGroups = ->
-    $('svg > g').hide()
+    g = _toArray(document.getElementsByTagName 'g')
+    for el in g
+      el.style.display = "none"
 
   # Make a group visible
   _showGroup = (group) ->
@@ -134,11 +157,12 @@ $ = @jQuery
       group = _getHash()
 
     # Make sure the group exists
-    return unless $group(group).length > 0 or group is ''
+    g = document.getElementById group
+    if g?
+      _hideGroups()
+      _dispatch @, ['next', group]
 
-    _hideGroups()
-    _dispatch @, ['next', group]
-
+    return
 
   # If a hash is specified, view the appropriate group
   _setInitialPage = ->
@@ -147,7 +171,6 @@ $ = @jQuery
     if group
       _showGroup group
 
-
   # Handle clicks on items with instructions
   _handleClick = (e) ->
     actions = _getDescription(e.currentTarget)
@@ -155,30 +178,28 @@ $ = @jQuery
     # Skip if there's no description
     return unless actions
 
-    for action in actions.split /([\s\n]+)/
-      _dispatch @, action.split /\=/
+    for action in actions.split /\n/
+      actionArr = action.split /\=/
+      _dispatch actionArr[0], actionArr[1]
 
     return
 
-
   # Change the cursor for interactive elements
   _handleHover = (e) ->
-    $this = $(this)
-    isHovered = e.type is "mouseenter"
+    el = e.currentTarget
 
     # Skip if there's no description
-    return unless _getDescription(e.currentTarget)
+    if _getDescription(el)
 
-    # Alter hover CSS if there's a hover filter
-    if filter.hover
-      hover = if isHovered then "url(##{filter.hover})" else "none"
-      $this.css filter: hover
+      # Alter hover CSS if there's a hover filter
+      if filter.hover
+        el.style.filter="url(##{filter.hover})"
 
-    # Skip if already hoverable
-    return if $this.data('hoverable')
-
-    # We're handling the hoverable state now
-    $this.data('hoverable', true).css(cursor: 'pointer')
+      # Skip if already hoverable
+      unless el.hoverable == true
+        # We're handling the hoverable state now
+        el.hoverable = true
+        el.style.cursor = "pointer"
 
     return
 
@@ -186,27 +207,25 @@ $ = @jQuery
   # This function binds the correct events to trigger elements.
   # Trigger elements are any element with a 'desc' child element.
   # If new trigger elements will be added to the SVG DOM,
-  # this function should be called afterwards to 
+  # this function should be called afterwards to
   # ensure they are correctly bound.
   bindTriggers = () ->
-    ($ 'desc').parent()
-      .click(_handleClick)
-      .hover(_handleHover)
-
+    descs = _toArray(document.getElementsByTagName 'desc')
+    for el in descs
+      el.parentElement.addEventListener 'click', _handleClick
+      el.parentElement.addEventListener 'mouseover', _handleHover
 
   # Run on page load
-  init = (loadEvent) ->
+  init = () ->
     _initLayers()
     _setInitialPage()
     _findFilters()
     _stripInlineJS()
 
-    $(window).bind 'hashchange', _showGroup
+    window.addEventListener 'hashchange', _showGroup
     bindTriggers()
-
 
   {init, bindTriggers} # Public exports
 
-
-# Hack to attach the init to <svg/> for an unobtrusive SVG onload
-$('svg').attr onload: 'magicmockup.init()'
+window.onload = () ->
+  magicmockup.init()

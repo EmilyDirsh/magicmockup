@@ -38,7 +38,7 @@ We currently support the following directives:
 * show=layer1,layer2.. : Show the specified layers
 * hide=layer1,layer2.. : Hide the specified layers
 * toggle=layer1,layer2.. : Toggle the specified layers
-* fadeOut=layer,seconds(1),easing(linear) : fade out the specified layer in &lt;seconds&gt;seconds (1sec default) with &lt;easing&gt; easing function (`linear` by default). Easing functions supported are `swing`, and `linear`.
+* fadeOut=layer[,duration = '.5s'] : fade out the specified layer in the specified duration - duration is a css-compatible time string such as ".5s", or "1s", ".5s" by default
 
 Now, you can make interactive mockups! Also,
 clickable areas (buttons, etc.) are indicated by a mouse pointer.
@@ -57,8 +57,7 @@ Then, when you open Inkscape, go to File > New, and choose InteractiveMockup fro
 
 ## Developing
 
-MagicMarkup is written in CoffeeScript and uses jQuery. You'll
-need CoffeeScript installed to develop.
+MagicMockup is written in CoffeeScript. You'll need CoffeeScript installed to develop.
 
 You may install CoffeeScript either via:
 
@@ -69,20 +68,18 @@ You may install CoffeeScript either via:
     npm install coffee-script
   
 ...Depending on if you are using Ruby & Gem or Node.js & NPM.
-As CoffeeScript is JavaScript, we suggest installing Node.js
-and using `npm` for installation.
+j
+As CoffeeScript is JavaScript, we suggest installing Node.js and using `npm` for installation.
 
-Build magicmockup.js using `cake build` - this will compile magicmockup.coffee and concatenate it with the dependencies in the deps/ directory.
+Build MagicMockup using `coffee -c magicmockup.coffee`
 
-There is a really simple script included for helping you to
-remember the commands to start a test webserver (based on Python —
-although any web server would work).
+For development, you can run `coffee -cw magicmockup.coffee`, and coffe will watch the file and automatically recompile whenever you make a change.
 
+`test.svg` is a click-through test for the current directives. Open it in your favorite browser and watch the magic happen! If you add new directives to Magic Mockup, make sure you add a test for it as well in `test.svg`
 
 ## TODO
 
 * More Directives
-* Easier setup (no SVG hand-editing, even if it's just copy/paste)
 * External document links
 * Animations
 * External directive file (possibly)
@@ -94,7 +91,4 @@ http://ietherpad.com/g6KdUcpNIH
 ## Authors
 * Máirín Duffy
 * Garrett LeSage
-
-## Credits
-* jQuery (jquery.com)
-* jQuery SVG plugin by Keith Wood (http://keith-wood.name/svg.html)
+* Emily Dirsh
