@@ -1,0 +1,20 @@
+- Startup directives - directives to run on document load. For example, hide something, show something else, etc. Use case: have a default layer (e.g. a cover page) displayed as a document, but start on a different layer when in "interactive" mode.
+    - Where should these be declared? Scripting or metadata description?
+    - Support all directives or only subset?
+
+- Keyboard shortcut to highlight interactive elements. Also research a fixed banner informing users about keyboard shortcut.
+    - Which key? 
+    - Make optional?
+
+- Support classes in directives. I see this being particularly useful in Startup directives. For example, assign a shared class to any notes/comments in the document, and hide them when in interactive mode.
+    - Maybe better to require specific labelling of various types, e.g. 'foo' is a layer, '#foo' means something with the id foo, '.foo' is class foo. Another option would be more explicity labelling, e.g. layer:foo, id:foo, class:foo.
+        - First option example: 
+            show: foo, bar, #bat
+            fadeOut: .faders
+        - Second option example:
+            show: layer:foo, layer:bar, id:bat
+            fadeOut: class:faders
+
+        - First option feels less disruptive... Second option makes it more clear to novice users...
+
+
